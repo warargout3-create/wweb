@@ -1,0 +1,331 @@
+<%- include('partials/header') %>
+
+<section class="section teacher-panel-section">
+    <div class="container">
+        <div class="cabinet-header">
+            <h1 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Панель преподавателя</h1>
+        </div>
+
+        <div class="teacher-tabs">
+            <button class="teacher-tab active" data-tab="students">
+                <i class="fas fa-users"></i> Ученики
+            </button>
+            <button class="teacher-tab" data-tab="articles-edit">
+                <i class="fas fa-newspaper"></i> Статьи
+            </button>
+            <button class="teacher-tab" data-tab="homework-edit">
+                <i class="fas fa-tasks"></i> ДЗ
+            </button>
+            <button class="teacher-tab" data-tab="chat-edit">
+                <i class="fas fa-comments"></i> Чат
+            </button>
+            <button class="teacher-tab" data-tab="videos-edit">
+                <i class="fas fa-video"></i> Видео
+            </button>
+        </div>
+
+        <!-- Students Tab -->
+        <div class="teacher-panel active" id="students">
+            <div class="panel-header">
+                <h2><i class="fas fa-users"></i> Список учеников</h2>
+            </div>
+            <div class="students-grid">
+                <% students.forEach(student => { %>
+                    <div class="student-card <%= student.isPaid ? 'paid' : '' %>">
+                        <div class="student-photo">
+                            <% if (student.photo) { %>
+                                <img src="<%= student.photo %>" alt="<%= student.name %>">
+                            <% } else { %>
+                                <i class="fas fa-user-graduate"></i>
+                            <% } %>
+                        </div>
+                        <div class="student-info">
+                            <h4><%= student.name %></h4>
+                            <span class="student-email"><i class="fas fa-envelope"></i> <%= student.email %></span>
+                            <% if (student.phone) { %>
+                                <span class="student-phone"><i class="fas fa-phone"></i> <%= student.phone %></span>
+                            <% } %>
+                            <span class="paid-status <%= student.isPaid ? 'paid' : 'unpaid' %>">
+                                <i class="fas fa-<%= student.isPaid ? 'check-circle' : 'times-circle' %>"></i>
+                                <%= student.isPaid ? 'Оплачено' : 'Не оплачено' %>
+                            </span>
+                        </div>
+                        <form action="/teacher/toggle-paid" method="POST" class="toggle-paid-form">
+                            <input type="hidden" name="student_id" value="<%= student.id %>">
+                            <button type="submit" class="btn btn-sm <%= student.isPaid ? 'btn-danger' : 'btn-success' %>">
+                                <i class="fas fa-<%= student.isPaid ? 'lock' : 'unlock' %>"></i>
+                                <%= student.isPaid ? 'Отключить' : 'Активировать' %>
+                            </button>
+                        </form>
+                    </div>
+                <% }) %>
+                <% if (students.length === 0) { %>
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>Пока нет зарегистрированных учеников</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Articles Tab -->
+        <div class="teacher-panel" id="articles-edit">
+            <div class="panel-header">
+                <h2><i class="fas fa-newspaper"></i> Управление статьями</h2>
+                <button class="btn btn-primary" id="showCreateArticle">
+                    <i class="fas fa-plus"></i> Новая статья
+                </button>
+            </div>
+
+            <div class="create-article-form" id="createArticleForm" style="display: none;">
+                <h3><i class="fas fa-pen"></i> Создать статью</h3>
+                <form action="/teacher/create-article" method="POST">
+                    <div class="form-group">
+                        <label>Название статьи</label>
+                        <input type="text" name="title" placeholder="Введите название" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Предмет</label>
+                        <select name="subject" required>
+                            <option value="math">Математика</option>
+                            <option value="physics">Физика</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Содержание (HTML)</label>
+                        <textarea name="content" rows="15" placeholder="Напишите содержание статьи... Используйте HTML-теги для форматирования (p, h2, img, ul, ol, li и т.д.)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Опубликовать
+                    </button>
+                </form>
+            </div>
+
+            <div class="articles-list">
+                <% if (articles.length > 0) { %>
+                    <% articles.forEach(article => { %>
+                        <div class="article-edit-card">
+                            <div class="article-edit-info">
+                                <h4><%= article.title %></h4>
+                                <span class="article-subject"><%= article.subject === 'math' ? 'Математика' : 'Физика' %></span>
+                                <span class="article-date"><%= new Date(article.created_at).toLocaleDateString('ru-RU') %></span>
+                            </div>
+                            <form action="/teacher/delete-article/<%= article.id %>" method="POST" class="delete-form">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить статью?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-newspaper"></i>
+                        <p>Статьи не созданы</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Homework Tab -->
+        <div class="teacher-panel" id="homework-edit">
+            <div class="panel-header">
+                <h2><i class="fas fa-tasks"></i> Управление ДЗ</h2>
+                <button class="btn btn-primary" id="showCreateHomework">
+                    <i class="fas fa-plus"></i> Новое задание
+                </button>
+            </div>
+
+            <div class="create-homework-form" id="createHomeworkForm" style="display: none;">
+                <h3><i class="fas fa-pen"></i> Создать домашнее задание</h3>
+                <form action="/teacher/create-homework" method="POST">
+                    <div class="form-group">
+                        <label>Ученик</label>
+                        <select name="student_id" required>
+                            <option value="">Выберите ученика</option>
+                            <% students.forEach(student => { %>
+                                <option value="<%= student.id %>"><%= student.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Название</label>
+                        <input type="text" name="title" placeholder="Название задания" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea name="description" rows="5" placeholder="Описание домашнего задания"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Создать
+                    </button>
+                </form>
+            </div>
+
+            <div class="homework-list-edit">
+                <% if (homework.length > 0) { %>
+                    <% homework.forEach(hw => { %>
+                        <div class="homework-edit-card">
+                            <div class="hw-header">
+                                <h4><%= hw.title %></h4>
+                                <span class="homework-status status-<%= hw.status %>">
+                                    <% if (hw.status === 'assigned') { %>
+                                        <i class="fas fa-clock"></i> Ожидает
+                                    <% } else if (hw.status === 'submitted') { %>
+                                        <i class="fas fa-check"></i> На проверке
+                                    <% } else { %>
+                                        <i class="fas fa-check-double"></i> Проверено
+                                    <% } %>
+                                </span>
+                            </div>
+                            <p class="hw-student"><i class="fas fa-user"></i> <%= hw.student_name %></p>
+                            <p class="hw-desc"><%= hw.description %></p>
+                            <% if (hw.status === 'submitted') { %>
+                                <form action="/teacher/check-homework/<%= hw.id %>" method="POST" class="check-form">
+                                    <div class="check-inputs">
+                                        <input type="text" name="grade" placeholder="Оценка" class="grade-input">
+                                        <textarea name="teacher_comment" rows="2" placeholder="Комментарий преподавателя" class="comment-input"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Проверить
+                                    </button>
+                                </form>
+                            <% } %>
+                            <% if (hw.grade) { %>
+                                <div class="hw-grade">Оценка: <strong><%= hw.grade %></strong></div>
+                            <% } %>
+                            <% if (hw.teacher_comment) { %>
+                                <div class="hw-comment"><i class="fas fa-comment"></i> <%= hw.teacher_comment %></div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <p>Домашние задания не созданы</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Chat Tab -->
+        <div class="teacher-panel" id="chat-edit">
+            <div class="panel-header">
+                <h2><i class="fas fa-comments"></i> Чат с учениками</h2>
+            </div>
+            <div class="teacher-chat-container">
+                <div class="chat-messages" id="teacherChatMessages">
+                    <% if (messages.length > 0) { %>
+                        <% messages.slice().reverse().forEach(msg => { %>
+                            <div class="chat-message <%= msg.sender_id_num === user.id ? 'my-message' : 'student-message' %>">
+                                <div class="message-sender"><%= msg.sender_name %></div>
+                                <div class="message-content"><%= msg.content %></div>
+                                <div class="message-time">
+                                    <%= new Date(msg.created_at).toLocaleString('ru-RU') %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="chat-empty">
+                            <i class="fas fa-comment-dots"></i>
+                            <p>Нет сообщений</p>
+                        </div>
+                    <% } %>
+                </div>
+                <div class="teacher-chat-inputs">
+                    <form class="chat-input" action="/teacher/send-message" method="POST">
+                        <select name="student_id" required>
+                            <option value="">Выберите ученика</option>
+                            <% students.forEach(student => { %>
+                                <option value="<%= student.id %>"><%= student.name %></option>
+                            <% }) %>
+                        </select>
+                        <input type="text" name="content" placeholder="Введите сообщение..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Tab -->
+        <div class="teacher-panel" id="videos-edit">
+            <div class="panel-header">
+                <h2><i class="fas fa-video"></i> Видеоуроки</h2>
+                <button class="btn btn-primary" id="showAddVideo">
+                    <i class="fas fa-plus"></i> Добавить видео
+                </button>
+            </div>
+
+            <div class="add-video-form" id="addVideoForm" style="display: none;">
+                <h3><i class="fas fa-video"></i> Добавить видеоурок</h3>
+                <form action="/teacher/add-video" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Ученик</label>
+                        <select name="student_id" required>
+                            <option value="">Выберите ученика</option>
+                            <% students.forEach(student => { %>
+                                <option value="<%= student.id %>"><%= student.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Название видео</label>
+                        <input type="text" name="title" placeholder="Название урока" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Видеофайл</label>
+                        <input type="file" name="video" accept="video/mp4,video/webm,video/ogg" class="file-input" required>
+                        <span class="form-hint">Максимальный размер: 50 МБ. Поддерживаемые форматы: MP4, WebM, OGG</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание</label>
+                        <textarea name="description" rows="3" placeholder="Описание урока"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Добавить
+                    </button>
+                </form>
+            </div>
+
+            <div class="videos-list-edit">
+                <% if (videos.length > 0) { %>
+                    <% videos.forEach(video => { %>
+                        <div class="video-edit-card">
+                            <div class="video-edit-info">
+                                <h4><%= video.title %></h4>
+                                <span class="video-student"><i class="fas fa-user"></i> <%= video.student_name %></span>
+                                <span class="video-date"><%= new Date(video.created_at).toLocaleDateString('ru-RU') %></span>
+                            </div>
+                            <div class="video-edit-preview">
+                                <% if (video.video_url) { %>
+                                    <video width="240" height="135" controls preload="metadata">
+                                        <source src="<%= video.video_url %>">
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                <% } %>
+                            </div>
+                            <div class="video-edit-actions">
+                                <a href="<%= video.video_url %>" class="btn btn-primary btn-sm" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="/teacher/delete-video/<%= video.id %>" method="POST">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить видео?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-video"></i>
+                        <p>Видеоуроки не добавлены</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

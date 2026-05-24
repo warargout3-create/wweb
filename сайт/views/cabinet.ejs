@@ -1,0 +1,276 @@
+<%- include('partials/header') %>
+
+<section class="section cabinet-section">
+    <div class="container">
+        <div class="cabinet-header">
+            <h1 class="section-title"><i class="fas fa-user-circle"></i> Личный кабинет</h1>
+            <p class="cabinet-subtitle">Добро пожаловать, <%= userData.name %>!</p>
+        </div>
+
+        <div class="cabinet-tabs">
+            <button class="cabinet-tab active" data-tab="profile">
+                <i class="fas fa-user"></i> Профиль
+            </button>
+            <button class="cabinet-tab" data-tab="materials-tab">
+                <i class="fas fa-book"></i> Материалы
+            </button>
+            <button class="cabinet-tab" data-tab="chat">
+                <i class="fas fa-comments"></i> Чат
+            </button>
+            <button class="cabinet-tab" data-tab="homework-tab">
+                <i class="fas fa-tasks"></i> Домашние задания
+            </button>
+            <button class="cabinet-tab" data-tab="videos">
+                <i class="fas fa-video"></i> Видеоуроки
+            </button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div class="cabinet-panel active" id="profile">
+            <div class="profile-card">
+                <div class="profile-photo">
+                    <% if (userData.photo) { %>
+                        <img src="<%= userData.photo %>" alt="Фото профиля">
+                    <% } else { %>
+                        <div class="profile-photo-placeholder">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Photo Upload Form -->
+                <form class="profile-photo-upload" action="/cabinet/upload-photo" method="POST" enctype="multipart/form-data">
+                    <div class="file-upload-wrapper">
+                        <label for="photoInput" class="file-upload-label">
+                            <i class="fas fa-camera"></i>
+                            <span id="photoLabelText"><%= userData.photo ? 'Изменить фото' : 'Загрузить фото' %></span>
+                        </label>
+                        <input type="file" id="photoInput" name="photo" accept="image/jpeg,image/png,image/gif,image/webp" class="file-input-hidden">
+                        <span id="photoFileName" class="file-name-display"></span>
+                        <span class="form-hint">JPG, PNG, GIF, WebP. Макс. 50 МБ</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" id="photoSubmitBtn" style="display:none;">
+                        <i class="fas fa-upload"></i> Сохранить фото
+                    </button>
+                </form>
+
+                <form class="profile-form" action="/cabinet/update-profile" method="POST">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> ФИО</label>
+                        <input type="text" name="name" value="<%= userData.name %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" value="<%= userData.email %>" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Телефон</label>
+                        <input type="tel" name="phone" value="<%= userData.phone || '' %>" placeholder="+7 (999) 123-45-67">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Materials Tab -->
+        <div class="cabinet-panel" id="materials-tab">
+            <% if (isPaid) { %>
+                <div class="materials-content">
+                    <div class="paid-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Вам доступны все материалы индивидуальных занятий</span>
+                    </div>
+                    <div class="materials-links">
+                        <a href="/materials/math" class="material-link-card">
+                            <i class="fas fa-square-root-alt"></i>
+                            <h3>Математика</h3>
+                            <p>Учебные материалы по математике</p>
+                        </a>
+                        <a href="/materials/physics" class="material-link-card">
+                            <i class="fas fa-atom"></i>
+                            <h3>Физика</h3>
+                            <p>Учебные материалы по физике</p>
+                        </a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="materials-locked">
+                    <div class="locked-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Материалы индивидуальных занятий</h3>
+                    <p>Здесь будут храниться все материалы Ваших индивидуальных занятий</p>
+                    <p class="locked-hint">Для доступа к материалам необходимо записаться на индивидуальные занятия</p>
+                    <a href="/#contact" class="btn btn-primary btn-lg">
+                        <i class="fas fa-pen"></i> Записаться
+                    </a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Chat Tab -->
+        <div class="cabinet-panel" id="chat">
+            <% if (isPaid) { %>
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <i class="fas fa-comments"></i>
+                        <h3>Чат с преподавателем</h3>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <% if (messages.length > 0) { %>
+                            <% messages.slice().reverse().forEach(msg => { %>
+                                <div class="chat-message <%= msg.sender_id === userData.id ? 'my-message' : 'teacher-message' %>">
+                                    <div class="message-sender"><%= msg.sender_name %></div>
+                                    <div class="message-content"><%= msg.content %></div>
+                                    <% if (msg.file_path) { %>
+                                        <a href="<%= msg.file_path %>" class="message-file" target="_blank">
+                                            <i class="fas fa-paperclip"></i> Файл
+                                        </a>
+                                    <% } %>
+                                    <div class="message-time">
+                                        <%= new Date(msg.created_at).toLocaleString('ru-RU') %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="chat-empty">
+                                <i class="fas fa-comment-dots"></i>
+                                <p>Напишите преподавателю</p>
+                            </div>
+                        <% } %>
+                    </div>
+                    <form class="chat-input" action="/cabinet/send-message" method="POST">
+                        <input type="text" name="content" placeholder="Введите сообщение..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            <% } else { %>
+                <div class="materials-locked">
+                    <div class="locked-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Чат с преподавателем</h3>
+                    <p>Чат доступен после оплаты индивидуальных занятий</p>
+                    <a href="/#contact" class="btn btn-primary"><i class="fas fa-pen"></i> Записаться</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Homework Tab -->
+        <div class="cabinet-panel" id="homework-tab">
+            <% if (isPaid) { %>
+                <div class="homework-list">
+                    <% if (homework.length > 0) { %>
+                        <% homework.forEach(hw => { %>
+                            <div class="homework-card">
+                                <div class="homework-header">
+                                    <h3><%= hw.title %></h3>
+                                    <span class="homework-status status-<%= hw.status %>">
+                                        <% if (hw.status === 'assigned') { %>
+                                            <i class="fas fa-clock"></i> Ожидает
+                                        <% } else if (hw.status === 'submitted') { %>
+                                            <i class="fas fa-check"></i> На проверке
+                                        <% } else { %>
+                                            <i class="fas fa-check-double"></i> Проверено
+                                        <% } %>
+                                    </span>
+                                </div>
+                                <p class="homework-desc"><%= hw.description %></p>
+                                <% if (hw.grade) { %>
+                                    <div class="homework-grade">
+                                        <i class="fas fa-star"></i> Оценка: <strong><%= hw.grade %></strong>
+                                    </div>
+                                <% } %>
+                                <div class="homework-date">
+                                    <i class="far fa-calendar-alt"></i> <%= new Date(hw.created_at).toLocaleDateString('ru-RU') %>
+                                </div>
+                                <% if (hw.status !== 'submitted' && hw.status !== 'checked') { %>
+                                    <form class="homework-submit" action="/cabinet/submit-homework/<%= hw.id %>" method="POST" enctype="multipart/form-data">
+                                        <input type="file" name="solution" class="file-input" required>
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-upload"></i> Загрузить решение
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <i class="fas fa-tasks"></i>
+                            <h3>Домашних заданий пока нет</h3>
+                            <p>Преподаватель скоро добавит задания</p>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="materials-locked">
+                    <div class="locked-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Раздел доступен после оплаты</h3>
+                    <p>Запишитесь на индивидуальные занятия, чтобы получить доступ к домашним заданиям</p>
+                    <a href="/#contact" class="btn btn-primary"><i class="fas fa-pen"></i> Записаться</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Videos Tab -->
+        <div class="cabinet-panel" id="videos">
+            <% if (isPaid) { %>
+                <% if (videos.length > 0) { %>
+                    <div class="videos-grid">
+                        <% videos.forEach(video => { %>
+                            <div class="video-card">
+                                <div class="video-player-wrapper">
+                                    <% if (video.video_url) { %>
+                                        <video controls preload="metadata" class="video-player">
+                                            <source src="<%= video.video_url %>">
+                                            Ваш браузер не поддерживает видео.
+                                        </video>
+                                    <% } else { %>
+                                        <div class="video-thumbnail">
+                                            <i class="fas fa-play-circle"></i>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="video-info">
+                                    <h3><%= video.title %></h3>
+                                    <p><%= video.description %></p>
+                                    <div class="video-date">
+                                        <i class="far fa-calendar-alt"></i> <%= new Date(video.created_at).toLocaleDateString('ru-RU') %>
+                                    </div>
+                                    <% if (video.video_url) { %>
+                                        <a href="<%= video.video_url %>" class="btn btn-primary btn-sm" download>
+                                            <i class="fas fa-download"></i> Скачать
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-video"></i>
+                        <h3>Видеоуроков пока нет</h3>
+                        <p>Записи занятий появятся после начала обучения</p>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="materials-locked">
+                    <div class="locked-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Видеоуроки доступны после оплаты</h3>
+                    <p>Запишитесь на занятия, чтобы получить доступ к видеоматериалам</p>
+                    <a href="/#contact" class="btn btn-primary"><i class="fas fa-pen"></i> Записаться</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

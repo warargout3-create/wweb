@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<section class="section article-single-section">
+    <div class="container">
+        <div class="article-navigation">
+            <a href="/materials/<%= article.subject %>" class="back-link">
+                <i class="fas fa-arrow-left"></i> К материалам
+            </a>
+            <span class="article-subject-badge">
+                <i class="fas fa-<%= article.subject === 'math' ? 'square-root-alt' : 'atom' %>"></i>
+                <%= subjectName %>
+            </span>
+        </div>
+
+        <article class="article-single">
+            <header class="article-single-header">
+                <h1><%= article.title %></h1>
+                <div class="article-meta">
+                    <span><i class="fas fa-user"></i> <%= article.author_name %></span>
+                    <span><i class="far fa-calendar-alt"></i> <%= new Date(article.created_at).toLocaleDateString('ru-RU') %></span>
+                </div>
+            </header>
+            <div class="article-single-content">
+                <%- article.content %>
+            </div>
+        </article>
+
+        <div class="article-actions">
+            <a href="/materials/<%= article.subject %>" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Другие статьи
+            </a>
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> На главную
+            </a>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>
