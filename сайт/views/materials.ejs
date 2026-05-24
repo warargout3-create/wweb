@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<section class="section materials-section">
+    <div class="container">
+        <div class="materials-header">
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> На главную</a>
+            <h1 class="section-title"><i class="fas fa-<%= subject === 'math' ? 'square-root-alt' : 'atom' %>"></i> <%= subjectName %></h1>
+            <p class="materials-subtitle">Учебные статьи и материалы по <%= subjectName.toLowerCase() %></p>
+        </div>
+
+        <div class="subject-tabs">
+            <a href="/materials/math" class="subject-tab <%= subject === 'math' ? 'active' : '' %>">
+                <i class="fas fa-square-root-alt"></i> Математика
+            </a>
+            <a href="/materials/physics" class="subject-tab <%= subject === 'physics' ? 'active' : '' %>">
+                <i class="fas fa-atom"></i> Физика
+            </a>
+        </div>
+
+        <% if (articles.length > 0) { %>
+            <div class="articles-grid">
+                <% articles.forEach(article => { %>
+                    <a href="/article/<%= article.id %>" class="article-card">
+                        <div class="article-card-inner">
+                            <div class="article-icon">
+                                <i class="fas fa-<%= subject === 'math' ? 'calculator' : 'flask' %>"></i>
+                            </div>
+                            <h3 class="article-title"><%= article.title %></h3>
+                            <div class="article-date">
+                                <i class="far fa-calendar-alt"></i>
+                                <%= new Date(article.created_at).toLocaleDateString('ru-RU') %>
+                            </div>
+                            <div class="article-hover">
+                                <span>Читать статью <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h3>Статьи пока отсутствуют</h3>
+                <p>Скоро здесь появятся учебные материалы по <%= subjectName.toLowerCase() %></p>
+                <a href="/" class="btn btn-primary"><i class="fas fa-home"></i> На главную</a>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

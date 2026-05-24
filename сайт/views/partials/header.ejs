@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= typeof description !== 'undefined' ? description : 'Образовательная платформа для изучения математики и физики с опытным преподавателем. Индивидуальные занятия, материалы, подготовка к экзаменам.' %>">
+    <meta name="keywords" content="<%= typeof keywords !== 'undefined' ? keywords : 'математика, физика, преподаватель, репетитор, занятия, ЕГЭ, ОГЭ, подготовка' %>">
+    <meta name="author" content="Преподаватель математики и физики">
+    <meta property="og:title" content="<%= title %> | Образовательная платформа">
+    <meta property="og:description" content="<%= typeof description !== 'undefined' ? description : 'Индивидуальные занятия по математике и физике с опытным преподавателем' %>">
+    <meta property="og:type" content="website">
+    <title><%= title %> | Образовательная платформа</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="parallax-bg"></div>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Образовательная платформа</span>
+                </a>
+                <% if (!user) { %>
+                    <a href="/login" class="header-login-icon" title="Войти / Зарегистрироваться">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                <% } %>
+            </div>
+            <nav class="nav-menu" id="navMenu">
+                <a href="/" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                <a href="/materials/math" class="nav-link"><i class="fas fa-square-root-alt"></i> Математика</a>
+                <a href="/materials/physics" class="nav-link"><i class="fas fa-atom"></i> Физика</a>
+                <% if (user) { %>
+                    <a href="/cabinet" class="nav-link"><i class="fas fa-user"></i> Личный кабинет</a>
+                    <% if (user.role === 'teacher') { %>
+                        <a href="/teacher" class="nav-link teacher-link"><i class="fas fa-chalkboard-teacher"></i> Панель</a>
+                    <% } %>
+                    <a href="/logout" class="nav-link login-btn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                <% } else { %>
+                    <a href="/login" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Войти</a>
+                <% } %>
+            </nav>
+            <button class="burger" id="burgerBtn" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+    <main class="main-content">

@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+
+<section class="section auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+
+            <% if (error) { %>
+                <div class="auth-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><%= error %></span>
+                </div>
+            <% } %>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" action="/login" method="POST">
+                <div class="form-group">
+                    <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="loginEmail" name="email" placeholder="Введите ваш email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword"><i class="fas fa-lock"></i> Пароль</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Введите пароль" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" action="/register" method="POST">
+                <div class="form-group">
+                    <label for="regName"><i class="fas fa-user"></i> ФИО</label>
+                    <input type="text" id="regName" name="name" placeholder="Иванов Иван Иванович" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="regEmail" name="email" placeholder="example@mail.ru" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone"><i class="fas fa-phone"></i> Телефон</label>
+                    <input type="tel" id="regPhone" name="phone" placeholder="+7 (999) 123-45-67" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword"><i class="fas fa-lock"></i> Пароль</label>
+                    <input type="password" id="regPassword" name="password" placeholder="Минимум 6 символов" autocomplete="new-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i> Зарегистрироваться
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>
