@@ -9,11 +9,11 @@ echo ============================================
 echo.
 
 echo [1/3] Ostanovka staryh processov...
-taskkill /F /IM node.exe 2>/dev/null
-timeout /t 2 /nobreak > /dev/null
+taskkill /F /IM node.exe 2>nul
+timeout /t 2 /nobreak > nul
 
 echo [2/3] Proverka Node.js...
-node -v > /dev/null 2>&1
+node -v > nul 2>&1
 if errorlevel 1 (
     echo.
     echo   OSHIBKA: Node.js ne ustanovlen!
@@ -36,7 +36,7 @@ if not exist "node_modules" (
 
 if not exist ".env" (
     if exist ".env.example" (
-        copy ".env.example" ".env" > /dev/null
+        copy ".env.example" ".env" > nul
     ) else (
         echo JWT_SECRET=teacher-platform-secret-key-2026> .env
         echo PORT=3000>> .env
@@ -45,7 +45,7 @@ if not exist ".env" (
 
 echo [3/3] Zapusk servera...
 start "" cmd /c "node server.js > server.log 2>server-error.log"
-timeout /t 4 /nobreak > /dev/null
+timeout /t 4 /nobreak > nul
 
 echo.
 echo ============================================
@@ -65,5 +65,5 @@ echo.
 start http://localhost:3000
 
 :wait
-timeout /t 30 /nobreak > /dev/null
+timeout /t 30 /nobreak > nul
 goto wait

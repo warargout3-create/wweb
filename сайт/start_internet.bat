@@ -9,12 +9,12 @@ echo ============================================
 echo.
 
 echo [1/5] Ostanovka staryh processov...
-taskkill /F /IM node.exe 2>/dev/null
-taskkill /F /IM ngrok.exe 2>/dev/null
-timeout /t 2 /nobreak > /dev/null
+taskkill /F /IM node.exe 2>nul
+taskkill /F /IM ngrok.exe 2>nul
+timeout /t 2 /nobreak > nul
 
 echo [2/5] Proverka Node.js...
-node -v > /dev/null 2>&1
+node -v > nul 2>&1
 if errorlevel 1 (
     echo.
     echo   OSHIBKA: Node.js ne ustanovlen!
@@ -50,7 +50,7 @@ if not exist "ngrok.exe" (
         exit /b 1
     )
     powershell -Command "Expand-Archive -Path 'ngrok.zip' -DestinationPath '.' -Force"
-    del ngrok.zip 2>/dev/null
+    del ngrok.zip 2>nul
     if not exist "ngrok.exe" (
         echo.
         echo   OSHIBKA: ngrok.exe ne naydeno posle raspakovki.
@@ -62,11 +62,11 @@ if not exist "ngrok.exe" (
 echo   OK
 
 echo [5/5] Nastroyka i zapusk...
-ngrok.exe config add-authtoken 3EBXw1OyZ84K3AEFJYZzVzwZ8c8_UqcYPynneFQdAbXEPVsq > /dev/null 2>&1
+ngrok.exe config add-authtoken 3EBXw1OyZ84K3AEFJYZzVzwZ8c8_UqcYPynneFQdAbXEPVsq > nul 2>&1
 
 if not exist ".env" (
     if exist ".env.example" (
-        copy ".env.example" ".env" > /dev/null
+        copy ".env.example" ".env" > nul
     ) else (
         echo JWT_SECRET=teacher-platform-secret-key-2026> .env
         echo PORT=3000>> .env
@@ -75,7 +75,7 @@ if not exist ".env" (
 
 echo   Zapusk servera Node.js...
 start "" cmd /c "node server.js > server.log 2>server-error.log"
-timeout /t 4 /nobreak > /dev/null
+timeout /t 4 /nobreak > nul
 
 echo.
 echo ============================================
