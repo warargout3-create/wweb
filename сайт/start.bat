@@ -1,35 +1,69 @@
 @echo off
-title Образовательная платформа - Сервер
+title Obrazovatelnaya platforma - Server
 cd /d "%~dp0"
 
 echo ============================================
-echo   Образовательная платформа
-echo   Запуск сервера...
+echo   Obrazovatelnaya platforma
+echo   Zapusk servera...
 echo ============================================
 echo.
 
-:: Останавливаем старые процессы
- echo [0/1] Останавливаю старые процессы...
-taskkill /F /IM node.exe 2>nul
-timeout /t 2 /nobreak > nul
+echo [1/3] Ostanovka staryh processov...
+taskkill /F /IM node.exe 2>/dev/null
+timeout /t 2 /nobreak > /dev/null
 
-echo [1/1] Запускаю сервер...
-start /B node server.js > server.log 2>&1
-timeout /t 4 /nobreak > nul
+echo [2/3] Proverka Node.js...
+node -v > /dev/null 2>&1
+if errorlevel 1 (
+    echo.
+    echo   OSHIBKA: Node.js ne ustanovlen!
+    echo   Skachayte s sayta: https://nodejs.org
+    echo.
+    pause
+    exit /b 1
+)
 
-echo   [+] Сервер запущен!
-echo   [+] Откройте в браузере: http://localhost:3000
+if not exist "node_modules" (
+    echo   Ustanavlivayu zavisimosti...
+    npm install
+    if errorlevel 1 (
+        echo.
+        echo   OSHIBKA pri npm install.
+        pause
+        exit /b 1
+    )
+)
+
+if not exist ".env" (
+    if exist ".env.example" (
+        copy ".env.example" ".env" > /dev/null
+    ) else (
+        echo JWT_SECRET=teacher-platform-secret-key-2026> .env
+        echo PORT=3000>> .env
+    )
+)
+
+echo [3/3] Zapusk servera...
+start "" cmd /c "node server.js > server.log 2>server-error.log"
+timeout /t 4 /nobreak > /dev/null
+
 echo.
 echo ============================================
-echo   Не закрывайте это окно — сервер работает!
-echo   Чтобы остановить: нажмите Ctrl+C
-echo   или запустите stop_server.bat
+echo   Server zapushchen!
+echo.
+echo   Adres: http://localhost:3000
+echo.
+echo   Login prepodavatelya:
+echo     Email:  warargoutr@gmail.com
+echo     Parol:  123456
+echo.
+echo   NE ZAKRYVAYTE eto okno!
+echo   Dlya ostanovki: stop_server.bat
 echo ============================================
 echo.
 
-:: Открываем браузер
 start http://localhost:3000
 
 :wait
-timeout /t 30 /nobreak > nul
+timeout /t 30 /nobreak > /dev/null
 goto wait

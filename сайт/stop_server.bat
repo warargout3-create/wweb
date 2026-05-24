@@ -1,5 +1,6 @@
 @echo off
-echo Остановка сервера образовательной платформы...
-taskkill /F /IM node.exe 2>nul
-echo Сервер остановлен.
+echo Ostanovka servera...
+taskkill /F /IM node.exe 2>/dev/null
+taskkill /F /IM ngrok.exe 2>/dev/null
+echo Server ostanovlen.
 pause
