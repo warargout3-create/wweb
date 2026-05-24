@@ -32,12 +32,14 @@ function fileFilter(req, file, cb) {
   }
 }
 
+const UPLOAD_BASE = path.join(__dirname, '..', 'public', 'uploads');
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let uploadPath = 'public/uploads/';
-    if (file.fieldname === 'solution') uploadPath += 'homework/';
-    else if (file.fieldname === 'video') uploadPath += 'videos/';
-    else uploadPath += 'images/';
+    let uploadPath;
+    if (file.fieldname === 'solution') uploadPath = path.join(UPLOAD_BASE, 'homework');
+    else if (file.fieldname === 'video') uploadPath = path.join(UPLOAD_BASE, 'videos');
+    else uploadPath = path.join(UPLOAD_BASE, 'images');
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
