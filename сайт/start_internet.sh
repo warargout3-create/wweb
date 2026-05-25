@@ -83,16 +83,39 @@ PORT=${PORT:-3000}
 
 # ── 6. Запускаем сервер ───────────────────────────────────────────────────────
 echo "[5/5] Запускаю сервер..."
-node server.js > server.log 2>>server-error.log &
+rm -f server.log server-error.log
+node server.js > server.log 2>server-error.log &
 SERVER_PID=$!
-sleep 3
 
-# Проверяем что сервер запустился
-if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-  echo ""
-  echo "  ОШИБКА: сервер не запустился. Смотрите server-error.log"
-  exit 1
-fi
+echo "  Ожидаю запуска на порту $PORT..."
+WAITED=0
+while true; do
+  sleep 2
+  WAITED=$((WAITED + 2))
+  # проверяем процесс
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo ""
+    echo "  ОШИБКА: сервер упал. Содержимое server-error.log:"
+    cat server-error.log 2>/dev/null
+    exit 1
+  fi
+  # проверяем что порт слушается
+  if command -v ss &>/dev/null; then
+    ss -tln 2>/dev/null | grep -q ":$PORT " && break
+  elif command -v netstat &>/dev/null; then
+    netstat -tln 2>/dev/null | grep -q ":$PORT " && break
+  else
+    # fallback: просто ждём
+    [ $WAITED -ge 6 ] && break
+  fi
+  if [ $WAITED -ge 30 ]; then
+    echo ""
+    echo "  ОШИБКА: сервер не запустился за 30 секунд. Смотрите server-error.log"
+    cat server-error.log 2>/dev/null
+    exit 1
+  fi
+done
+echo "  Сервер запущен!"
 
 echo ""
 echo "============================================"
