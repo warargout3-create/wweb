@@ -74,8 +74,34 @@ if not exist ".env" (
 )
 
 echo   Zapusk servera Node.js...
+if exist "server.log" del server.log 2>nul
+if exist "server-error.log" del server-error.log 2>nul
 start "" cmd /c "node server.js > server.log 2>server-error.log"
-timeout /t 4 /nobreak > nul
+
+echo   Ozhidayu zapuska servera na portu 3000...
+set WAITED=0
+:check_port
+timeout /t 2 /nobreak > nul
+netstat -an 2>nul | findstr ":3000 " | findstr "LISTENING" > nul
+if not errorlevel 1 goto server_ok
+set /a WAITED+=2
+if %WAITED% lss 30 goto check_port
+
+echo.
+echo   OSHIBKA: Server ne zapustilsya za 30 sekund!
+echo.
+echo   Vot soderzhimoe server-error.log:
+echo ----------------------------------------
+type server-error.log 2>nul
+echo ----------------------------------------
+echo.
+echo   Ubedites chto Node.js ustanovlen pravilno
+echo   i ne bylo oshibok pri zapuske.
+pause
+exit /b 1
+
+:server_ok
+echo   Server uspeshno zapushchen na portu 3000!
 
 echo.
 echo ============================================
