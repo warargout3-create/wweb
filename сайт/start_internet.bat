@@ -1,94 +1,101 @@
 @echo off
-title Образовательная платформа — Запуск в интернет
+title Obrazovatelnaya platforma - Internet
 cd /d "%~dp0"
-chcp 65001 > nul 2>&1
 
 echo ============================================
-echo   Образовательная платформа
-echo   Запуск в общий доступ через ngrok
+echo   Obrazovatelnaya platforma
+echo   Zapusk v internet cherez ngrok
 echo ============================================
 echo.
 
-:: ── 1. Останавливаем старые процессы ────────────────────────────────────────
-echo [1/5] Останавливаю старые процессы...
+echo [1/5] Ostanovka staryh processov...
 taskkill /F /IM node.exe 2>nul
 taskkill /F /IM ngrok.exe 2>nul
 timeout /t 2 /nobreak > nul
 
-:: ── 2. Проверяем Node.js ─────────────────────────────────────────────────────
-echo [2/5] Проверяю Node.js...
+echo [2/5] Proverka Node.js...
 node -v > nul 2>&1
 if errorlevel 1 (
     echo.
-    echo   ОШИБКА: Node.js не установлен!
-    echo   Скачайте с сайта: https://nodejs.org
+    echo   OSHIBKA: Node.js ne ustanovlen!
+    echo   Skachayte s sayta: https://nodejs.org
     echo.
     pause
     exit /b 1
 )
-echo     OK
+for /f "tokens=*" %%v in ('node -v') do echo   OK ^(%%v^)
 
-:: ── 3. Устанавливаем зависимости если нужно ──────────────────────────────────
+echo [3/5] Proverka zavisimostey...
 if not exist "node_modules" (
-    echo [3/5] Устанавливаю зависимости...
+    echo   Ustanavlivayu zavisimosti...
     npm install
     if errorlevel 1 (
-        echo   ОШИБКА при установке зависимостей.
+        echo.
+        echo   OSHIBKA pri npm install.
         pause
         exit /b 1
     )
-) else (
-    echo [3/5] Зависимости OK
 )
+echo   OK
 
-:: ── 4. Скачиваем ngrok если его нет ──────────────────────────────────────────
-echo [4/5] Проверяю ngrok...
+echo [4/5] Proverka ngrok...
 if not exist "ngrok.exe" (
-    echo     Скачиваю ngrok для Windows...
-    curl -s -L -o ngrok.zip "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip"
+    echo   Skachivayu ngrok dlya Windows...
+    curl -L -o ngrok.zip "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip"
     if errorlevel 1 (
-        echo     ОШИБКА: не удалось скачать ngrok. Проверьте интернет.
+        echo.
+        echo   OSHIBKA: ne udalos skachat ngrok.
+        echo   Proverte internet-soedinenie.
         pause
         exit /b 1
     )
-    powershell -Command "Expand-Archive -Path 'ngrok.zip' -DestinationPath '.' -Force" > nul 2>&1
+    powershell -Command "Expand-Archive -Path 'ngrok.zip' -DestinationPath '.' -Force"
     del ngrok.zip 2>nul
-    echo     ngrok скачан
+    if not exist "ngrok.exe" (
+        echo.
+        echo   OSHIBKA: ngrok.exe ne naydeno posle raspakovki.
+        pause
+        exit /b 1
+    )
+    echo   ngrok skachan
 )
-echo     OK
+echo   OK
 
-:: ── 5. Настраиваем ngrok ─────────────────────────────────────────────────────
+echo [5/5] Nastroyka i zapusk...
 ngrok.exe config add-authtoken 3EBXw1OyZ84K3AEFJYZzVzwZ8c8_UqcYPynneFQdAbXEPVsq > nul 2>&1
 
-:: ── 6. Создаём .env если его нет ─────────────────────────────────────────────
 if not exist ".env" (
-    copy ".env.example" ".env" > nul 2>&1
-    if errorlevel 1 (
+    if exist ".env.example" (
+        copy ".env.example" ".env" > nul
+    ) else (
         echo JWT_SECRET=teacher-platform-secret-key-2026> .env
         echo PORT=3000>> .env
     )
 )
 
-:: ── 7. Запускаем сервер ───────────────────────────────────────────────────────
-echo [5/5] Запускаю сервер...
-start /B node server.js > server.log 2>server-error.log
+echo   Zapusk servera Node.js...
+start "" cmd /c "node server.js > server.log 2>server-error.log"
 timeout /t 4 /nobreak > nul
 
-:: ── 8. Запускаем ngrok в отдельном окне ─────────────────────────────────────
 echo.
 echo ============================================
-echo   Сервер запущен. Запускаю ngrok...
-echo   Дождитесь появления публичного адреса!
-echo ============================================
+echo   Server zapushchen!
 echo.
-echo   Локальный адрес:   http://localhost:3000
+echo   Lokalnyy adres: http://localhost:3000
 echo.
-echo   Войти как преподаватель:
-echo     Email:    warargoutr@gmail.com
-echo     Пароль:   123456
+echo   Login prepodavatelya:
+echo     Email:  warargoutr@gmail.com
+echo     Parol:  123456
 echo.
-echo   Для остановки — запустите stop_server.bat
+echo   Zapuskayu ngrok tunnel...
+echo   Dozhdites stroki: Forwarding https://...
+echo.
+echo   Dlya ostanovki: Ctrl+C, zatem stop_server.bat
 echo ============================================
 echo.
 
 ngrok.exe http 3000
+
+echo.
+echo   ngrok ostanovlen.
+pause
