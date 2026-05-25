@@ -120,7 +120,7 @@ echo   Dlya ostanovki: Ctrl+C, zatem stop_server.bat
 echo ============================================
 echo.
 
-ngrok.exe http 3000
+ngrok.exe http 127.0.0.1:3000
 
 echo.
 echo   ngrok ostanovlen.
